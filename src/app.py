@@ -4,7 +4,7 @@ import os
 from schema import Myntra
 from vector_search import run_vector_search
 
-# Flask app initialization
+
 app = Flask(__name__)
 
 # Configurations
