@@ -95,7 +95,8 @@
 
         input[type="text"], 
         input[type="number"], 
-        input[type="file"] {
+        input[type="file"], 
+        select {
             width: 100%;
             padding: 12px;
             border: 2px solid rgba(106, 17, 203, 0.2);
@@ -105,10 +106,15 @@
 
         input[type="text"]:focus, 
         input[type="number"]:focus, 
-        input[type="file"]:focus {
+        input[type="file"]:focus, 
+        select:focus {
             border-color: var(--primary-color);
             outline: none;
             box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+        }
+
+        .custom-limit {
+            display: none; /* Hidden by default */
         }
 
         .submit-btn {
@@ -136,6 +142,20 @@
             background: rgba(0,0,0,0.1);
             margin-top: 20px;
         }
+
+        .limit-option {
+            position: relative;
+        }
+
+        .limit-option::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-top: 5px solid var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -144,12 +164,12 @@
             <div class="logo-icon">
                 <i class="fas fa-tshirt" style="font-size: 30px;"></i>
             </div>
-            <div class="logo-text">FABRIC SEARCH </div>
+            <div class="logo-text">FABRIC SEARCH</div>
         </div>
     </header>
     
     <div class="container">
-        <form class="search-form" action="/" method="post" enctype="multipart/form-data">
+        <form class="search-form" action="/" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="table_name">Table Name:</label>
                 <input type="text" id="table_name" name="table_name" value="fabric">
@@ -160,9 +180,16 @@
                 <input type="text" id="search_query" name="search_query" placeholder="Enter query">
             </div>
             
-            <div class="form-group">
+            <div class="form-group limit-option">
                 <label for="limit">Limit:</label>
-                <input type="number" id="limit" name="limit" value="3">
+                <select id="limit" name="limit" onchange="handleLimitChange()">
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="0">No Limit</option>
+                    <option value="custom">Custom</option> <!-- Option for custom input -->
+                </select>
+                <input type="number" id="custom_limit" name="custom_limit" class="custom-limit" placeholder="Enter custom limit" min="1">
             </div>
             
             <div class="form-group">
@@ -179,5 +206,43 @@
     <footer>
         &copy; 2024 FABRIC Search. All rights reserved.
     </footer>
+
+    <script>
+        function handleLimitChange() {
+            const limitSelect = document.getElementById('limit');
+            const customLimitInput = document.getElementById('custom_limit');
+
+            if (limitSelect.value === 'custom') {
+                customLimitInput.style.display = 'block'; // Show custom limit input
+                customLimitInput.value = ''; // Clear any previous value
+                customLimitInput.focus(); // Focus on the input
+            } else {
+                customLimitInput.style.display = 'none'; // Hide custom limit input
+                customLimitInput.value = ''; // Clear custom input value
+            }
+        }
+
+        function validateForm() {
+            const limitSelect = document.getElementById('limit');
+            const customLimitInput = document.getElementById('custom_limit');
+
+            // If "Custom" is selected, replace the dropdown value with the custom limit value
+            if (limitSelect.value === 'custom') {
+                const customLimitValue = customLimitInput.value;
+
+                // Check if custom limit is valid
+                if (!customLimitValue || isNaN(customLimitValue) || customLimitValue <= 0) {
+                    alert("Please enter a valid custom limit greater than 0.");
+                    customLimitInput.focus();
+                    return false; // Prevent form submission
+                }
+
+                // Set the dropdown value to the custom limit
+                limitSelect.value = customLimitValue;
+            }
+
+            return true; // Allow form submission
+        }
+    </script>
 </body>
 </html>

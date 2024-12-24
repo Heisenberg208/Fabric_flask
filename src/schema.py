@@ -9,9 +9,9 @@ from embedding_model import register_model
 clip = register_model("open-clip")
 
 
-class Myntra(LanceModel):
+class Fabric(LanceModel):
     """
-    Represents a Myntra Schema.
+    Represents a Schema.
 
     Attributes:
         vector (Vector): The vector representation of the item.
@@ -38,9 +38,9 @@ def get_schema_by_name(schema_name: str) -> Any:
         object: The schema object corresponding to the given schema name, or None if not found.
 
     Usage:
-    >>> schema = get_schema_by_name("Myntra")
+    >>> schema = get_schema_by_name("Fabric")
     """
     schema_map = {
-        "Myntra": Myntra,
+        "Fabric": Fabric,
     }
     return schema_map.get(schema_name)

@@ -1,39 +1,34 @@
 import argparse
 from pathlib import Path
 from random import sample
-from typing import Any
-
 import lancedb
 import pandas as pd
 
-from schema import Myntra
+from schema import Fabric
 
 
-def create_table(
+def create_combined_table(
     database: str,
     table_name: str,
-    data_path: str,
-    schema: Any = Myntra,
+    root_folder: str,
+    schema: Fabric,
     mode: str = "overwrite",
-    num_samples: int = 1000,
-    force: bool = False  # Add a new parameter for forced recreation
+    force: bool = False,
 ) -> None:
     """
-    Create a table in the specified vector database and add data to it.
+    Create a single table in the specified vector database with data from all subfolders.
 
     Args:
         database (str): The name of the database to connect to.
         table_name (str): The name of the table to create.
-        data_path (str): The path to the data directory.
+        root_folder (str): The path to the root folder containing subfolders with images.
         schema (Schema, optional): The schema to use for the table. Defaults to Myntra.
         mode (str, optional): The mode for creating the table. Defaults to "overwrite".
-        num_samples(int, optional): The number of Image samples to be added to the database.
         force (bool, optional): Force recreation of the table if it exists. Defaults to False.
 
     Returns:
         None
     """
-
     # Connect to the lancedb database
     db = lancedb.connect(database)
 
@@ -48,19 +43,21 @@ def create_table(
         print(f"Table {table_name} already exists in the database")
         return
 
+    # Collect all image paths from subfolders
+    root_path = Path(root_folder).expanduser()
+    uris = [str(f) for f in root_path.rglob("*.jpg")]
+    print(f"Found {len(uris)} images in all subfolders of {root_folder}")
+
+    if not uris:
+        print("No images found. Exiting.")
+        return
+
+    # Sample images (optional: you can shuffle or limit the size if needed)
+    uris = sample(uris, len(uris))
+
     # Create the table
     print(f"Creating table {table_name} in the database")
-
-    # Create the table with the given schema
     table = db.create_table(table_name, schema=schema, mode=mode)
-
-    # Define the Path of the images and obtain the Image uri
-    p = Path(data_path).expanduser()
-    uris = [str(f) for f in p.glob("*.jpg")]
-    print(f"Found {len(uris)} images in {p}")
-
-    # Sample images from the data
-    uris = sample(uris, min(num_samples, len(uris)))
 
     # Add the data to the table
     print(f"Adding {len(uris)} images to the table")
@@ -70,32 +67,26 @@ def create_table(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Create a table in lancedb with Myntra data"
+        description="Create a combined table in lancedb from all subfolders"
     )
     parser.add_argument(
         "--database", help="Path to the lancedb database", default="~/.lancedb"
     )
     parser.add_argument(
-        "--table_name", help="Name of the table to be created", default="myntra"
+        "--table_name", help="Name of the table to be created", default="myntra_combined"
     )
     parser.add_argument(
-        "--data_path", help="Path to the Myntra data images", required=True
+        "--root_folder", help="Path to the root folder containing subfolders with images", required=True
     )
     parser.add_argument(
         "--schema",
         help="Schema to use for the table. Defaults to Myntra",
-        default=Myntra,
+        default=Fabric,
     )
     parser.add_argument(
         "--mode",
         help="Mode for creating the table. Defaults to 'overwrite'",
         default="overwrite",
-    )
-    parser.add_argument(
-        "--num_samples",
-        help="Number of Image samples to be added to the table",
-        type=int,
-        default=1000,
     )
     parser.add_argument(
         "--force",
@@ -104,12 +95,11 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    create_table(
+    create_combined_table(
         args.database,
         args.table_name,
-        args.data_path,
+        args.root_folder,
         args.schema,
         args.mode,
-        args.num_samples,
         args.force,
     )

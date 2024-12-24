@@ -5,7 +5,7 @@ from PIL import Image
 
 import lancedb
 
-from schema import Myntra, get_schema_by_name
+from schema import Fabric, get_schema_by_name
 
 
 def run_vector_search(
@@ -13,7 +13,7 @@ def run_vector_search(
     table_name: str,
     schema: Any,
     search_query: Any,
-    limit: int = 6,
+    limit: None,
     output_folder: str = "output",
 ) -> None:
     """
