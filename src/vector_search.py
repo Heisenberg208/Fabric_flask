@@ -76,7 +76,7 @@ if __name__ == "__main__":
     parser.add_argument("--database", type=str, help="Path to the database")
     parser.add_argument("--table_name", type=str, help="Name of the table")
     parser.add_argument(
-        "--schema", type=str, help="Schema of the table", default="Myntra"
+        "--schema", type=str, help="Schema of the table", default="Fabric"
     )
     parser.add_argument("--search_query", type=str, help="Search query")
     parser.add_argument(

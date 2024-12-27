@@ -6,3 +6,5 @@ uploads
 .DS_Store
 
 __pycache__
+main_tzs.py 
+delete_table.py
