@@ -8,3 +8,6 @@ uploads
 __pycache__
 main_tzs.py 
 delete_table.py
+log.py
+test1
+test2
