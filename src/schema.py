@@ -1,8 +1,6 @@
 from typing import Any
-
 from lancedb.pydantic import LanceModel, Vector
 from PIL import Image
-
 from embedding_model import register_model
 
 # Register the OpenAI CLIP model
@@ -17,9 +15,12 @@ class Fabric(LanceModel):
         vector (Vector): The vector representation of the item.
         image_uri (str): The URI of the item's image.
     """
-
     vector: Vector(clip.ndims()) = clip.VectorField()
     image_uri: str = clip.SourceField()
+    
+    hash: str  # Add the hash field
+    mtime: float
+
 
     @property
     def image(self):
@@ -36,9 +37,6 @@ def get_schema_by_name(schema_name: str) -> Any:
 
     Returns:
         object: The schema object corresponding to the given schema name, or None if not found.
-
-    Usage:
-    >>> schema = get_schema_by_name("Fabric")
     """
     schema_map = {
         "Fabric": Fabric,
