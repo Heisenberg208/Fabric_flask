@@ -1,0 +1,44 @@
+from typing import Any
+from lancedb.pydantic import LanceModel, Vector
+from PIL import Image
+from embedding_model import register_model
+
+# Register the OpenAI CLIP model
+clip = register_model("open-clip")
+
+
+class Fabric(LanceModel):
+    """
+    Represents a Schema.
+
+    Attributes:
+        vector (Vector): The vector representation of the item.
+        image_uri (str): The URI of the item's image.
+    """
+    vector: Vector(clip.ndims()) = clip.VectorField() # type: ignore
+    image_uri: str = clip.SourceField()
+    
+    hash: str  # Add the hash field
+    mtime: float
+
+
+    @property
+    def image(self):
+        return Image.open(self.image_uri)
+
+
+# Function to map schema name to schema class
+def get_schema_by_name(schema_name: str) -> Any:
+    """
+    Retrieves the schema object based on the given schema name.
+
+    Args:
+        schema_name (str): The name of the schema.
+
+    Returns:
+        object: The schema object corresponding to the given schema name, or None if not found.
+    """
+    schema_map = {
+        "Fabric": Fabric,
+    }
+    return schema_map.get(schema_name)
